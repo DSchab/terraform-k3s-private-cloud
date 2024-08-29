@@ -36,6 +36,12 @@ variable "private_subnets" {
   description = "List of private subnet ids. Nodes will be created here"
 }
 
+variable "trusted_ip_ranges" {
+  type        = list(string)
+  description = "List of trusted IP ranges for the cluster"
+  default     = []
+}
+
 # ----------------------------------------------
 # Node Instances
 # ----------------------------------------------
