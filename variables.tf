@@ -41,6 +41,12 @@ variable "private_subnets" {
 # ----------------------------------------------
 
 
+variable "master_count" {
+  description = "Number of master nodes. An odd number is required for HA w/ etcd."
+  default     = 3
+}
+
+
 variable "master_instance_type" {
   description = "Instance size for k3s master. Arm64 not supported yet."
   default     = "t3a.small"

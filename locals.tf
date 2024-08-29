@@ -1,6 +1,6 @@
 locals {
   cluster_id            = var.cluster_id
-  master_count          = 1
+  master_count          = var.master_count
   node_count            = var.node_count
   master_ami            = data.aws_ami.amz2-x86_64.id
   node_ami              = var.node_instance_arch == "arm64" ? data.aws_ami.amz2-arm64.id : data.aws_ami.amz2-x86_64.id
