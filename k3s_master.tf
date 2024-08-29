@@ -14,7 +14,6 @@ resource "aws_iam_role_policy_attachment" "k3s_master_cloud_provider" {
   policy_arn = module.iam_policies.k8s_master_full_arn
 }
 
-
 resource "aws_iam_role_policy_attachment" "k3s_master_session_manager" {
   role       = aws_iam_role.k3s_master.name
   policy_arn = module.iam_policies.session_manager_arn
@@ -25,32 +24,13 @@ resource "aws_iam_instance_profile" "k3s_master" {
   role = aws_iam_role.k3s_master.name
 }
 
-# https://cloudinit.readthedocs.io/en/latest/topics/format.html
-data "cloudinit_config" "k3s_master" {
-  gzip          = true
-  base64_encode = true
 
-  # Debug with:
-  # cat /var/log/cloud-init.log
-  part {
-    filename     = "init.cfg"
-    content_type = "text/cloud-config"
-    content = templatefile("${path.module}/user_data/master/cloud-config.yaml", {
-      aws_ccm_ds   = filebase64("${path.module}/user_data/master/cloud-provider-aws/aws-cloud-controller-manager-daemonset.yaml"),
-      aws_rbac     = filebase64("${path.module}/user_data/master/cloud-provider-aws/rbac.yaml")
-      storageclass = filebase64("${path.module}/user_data/master/cloud-provider-aws/storageclass.yaml")
-      aliases      = filebase64("${path.module}/user_data/master/env/aliases")
-    })
-  }
-
-  # Debug with:
-  # cat /tmp/k3s-server-install-debug.log
-  # Generated code can be found in /var/lib/cloud/instance/scripts (for debugging purpose)
-  part {
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/user_data/master/k3s-server-install.sh", {
+locals {
+  k3s_master_cloudinit_configs = {
+    for idx in range(local.master_count) : idx => templatefile("${path.module}/user_data/master/k3s-server-install.sh", {
       cluster_id    = local.cluster_id,
       cluster_token = random_password.cluster_token.result,
+      count_index   = idx,
     })
   }
 }
@@ -68,7 +48,8 @@ resource "aws_instance" "k3s_master" {
   vpc_security_group_ids = concat([
     aws_security_group.self.id,
     aws_security_group.node_ports.id,
-    aws_security_group.egress.id
+    aws_security_group.egress.id,
+    aws_security_group.master_sg.id
   ], var.extra_master_security_groups)
 
   root_block_device {
@@ -76,19 +57,19 @@ resource "aws_instance" "k3s_master" {
     encrypted   = true
   }
 
-  user_data = data.cloudinit_config.k3s_master.rendered
+  user_data = base64encode(local.k3s_master_cloudinit_configs[count.index])
 
   tags = {
     "Name"                                      = "${local.cluster_id}-master",
     "KubernetesCluster"                         = local.cluster_id,
-    "kubernetes.io/cluster/${local.cluster_id}" = "owned"
+    "kubernetes.io/cluster/${local.cluster_id}" = "owned",
     "k3s-role"                                  = "master"
   }
 
   lifecycle {
     ignore_changes = [
-      ami,       # new ami changes by amazon should not affect change to this instance
-      user_data, # https://github.com/hashicorp/terraform-provider-aws/issues/4954
+      ami,
+      user_data,
       tags,
       volume_tags,
     ]

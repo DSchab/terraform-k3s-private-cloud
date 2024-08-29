@@ -8,7 +8,7 @@ export INSTALL_K3S_SKIP_SELINUX_RPM=true  # Skip SELinux RPM during installation
 
 
 # Check if this is the first master node or a subsequent one
-if [ "${count.index}" == "0" ]; then
+if [ "${count_index}" == "0" ]; then
   # First master node initialization
   export ADDITIONAL_ARGS="--cluster-init"
   
