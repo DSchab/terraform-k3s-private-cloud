@@ -49,7 +49,8 @@ resource "aws_instance" "k3s_master" {
     aws_security_group.self.id,
     aws_security_group.node_ports.id,
     aws_security_group.egress.id,
-    aws_security_group.master_sg.id
+    aws_security_group.master_sg.id,
+    aws_security_group.nlb.id,
   ], var.extra_master_security_groups)
 
   root_block_device {
