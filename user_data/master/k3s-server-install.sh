@@ -14,11 +14,11 @@ if [ "${count_index}" == "0" ]; then
   
   # Store the internal IP address of the first master node in SSM Parameter Store
   FIRST_MASTER_INTERNAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-  aws ssm put-parameter --name "/k3s/first-master-ip" --value "$FIRST_MASTER_INTERNAL_IP" --type String --overwrite
+  aws ssm put-parameter --region "${region}" --name "/k3s/first-master-ip" --value "$FIRST_MASTER_INTERNAL_IP" --type String --overwrite
 else
   # Subsequent master nodes
   # Retrieve the IP address of the first master node from SSM Parameter Store
-  FIRST_MASTER_INTERNAL_IP=$(aws ssm get-parameter --name "/k3s/first-master-ip" --query "Parameter.Value" --output text)
+  FIRST_MASTER_INTERNAL_IP=$(aws ssm get-parameter --region "${region}"  --name "/k3s/first-master-ip" --query "Parameter.Value" --output text)
   export ADDITIONAL_ARGS="--server=https://$FIRST_MASTER_INTERNAL_IP:6443"
 fi
 

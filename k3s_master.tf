@@ -37,6 +37,7 @@ locals {
       cluster_token = random_password.cluster_token.result,
       count_index   = idx,
       ADDITIONAL_ARGS = "",
+      region = var.region
     })
   }
 }
