@@ -75,13 +75,6 @@ resource "aws_security_group" "master_sg" {
   description = "Security group for k3s master nodes"
 
   ingress {
-    from_port         = 6443
-    to_port           = 6443
-    protocol          = "tcp"
-    security_groups   = [aws_security_group.nlb.id]
-  }
-
-  ingress {
     from_port         = 10250
     to_port           = 10250
     protocol          = "tcp"

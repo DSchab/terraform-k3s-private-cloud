@@ -19,6 +19,11 @@ resource "aws_iam_role_policy_attachment" "k3s_master_session_manager" {
   policy_arn = module.iam_policies.session_manager_arn
 }
 
+resource "aws_iam_role_policy_attachment" "k3s_master_ssm_access" {
+  role       = aws_iam_role.k3s_master.name
+  policy_arn = module.iam_policies.ssm_access_arn
+}
+
 resource "aws_iam_instance_profile" "k3s_master" {
   name = "k3s_master_instance_profile-${local.cluster_id}"
   role = aws_iam_role.k3s_master.name

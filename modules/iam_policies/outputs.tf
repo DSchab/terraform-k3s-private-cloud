@@ -22,3 +22,8 @@ output "session_manager_arn" {
   value       = data.aws_iam_policy.ssm.arn
   description = "Policy ARN to enable SessionManager"
 }
+
+output "ssm_access_arn" {
+  value       = aws_iam_policy.k3s_master_ssm_access.arn
+  description = "Policy ARN to enable SSM put/get parameters"
+}
