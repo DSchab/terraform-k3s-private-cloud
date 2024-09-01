@@ -74,6 +74,7 @@ resource "aws_security_group" "master_sg" {
   vpc_id      = data.aws_vpc.this.id
   description = "Security group for k3s master nodes"
 
+
   ingress {
     from_port         = 10250
     to_port           = 10250
